@@ -1,0 +1,10 @@
+.env
+*.pyc
+__pycache__/
+.pytest_cache/
+volumes/
+data/*.pkl
+data/*.db
+eval/EVAL_REPORT.*
+.DS_Store
+*.egg-info/

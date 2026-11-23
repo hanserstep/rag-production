@@ -1,0 +1,33 @@
+{"qid": "q01", "question": "HNSW 的 efConstruction 参数调大会有什么代价？", "relevant_chunk_ids": ["01-向量检索与Milvus#2"], "type": "term"}
+{"qid": "q02", "question": "Milvus 的 HNSW 索引里 M 参数控制什么？", "relevant_chunk_ids": ["01-向量检索与Milvus#2"], "type": "term"}
+{"qid": "q03", "question": "查询时的 ef 参数和 top_k 是什么关系？", "relevant_chunk_ids": ["01-向量检索与Milvus#2"], "type": "term"}
+{"qid": "q04", "question": "RRF 公式里的 k 一般取多少，它的作用是什么？", "relevant_chunk_ids": ["02-BM25与混合检索#3"], "type": "term"}
+{"qid": "q05", "question": "jieba 分词在技术文档场景下有什么缺点？", "relevant_chunk_ids": ["02-BM25与混合检索#2"], "type": "term"}
+{"qid": "q06", "question": "字符二元组 bigram 是哪个检索库处理中文的默认做法？", "relevant_chunk_ids": ["02-BM25与混合检索#2"], "type": "term"}
+{"qid": "q07", "question": "用 Cross-Encoder 对全库做精排，计算量大概是多少倍？", "relevant_chunk_ids": ["03-重排序分块与评测#0"], "type": "term"}
+{"qid": "q08", "question": "chunk 的 overlap 通常设成 chunk_size 的多少比例？", "relevant_chunk_ids": ["03-重排序分块与评测#2"], "type": "term"}
+{"qid": "q09", "question": "MRR 里命中片段排在第三位能得多少分？", "relevant_chunk_ids": ["03-重排序分块与评测#3"], "type": "term"}
+{"qid": "q10", "question": "Milvus 架构里 etcd 负责存什么？", "relevant_chunk_ids": ["01-向量检索与Milvus#3"], "type": "term"}
+
+{"qid": "q11", "question": "为什么光靠关键词搜索效果不好？", "relevant_chunk_ids": ["01-向量检索与Milvus#0"], "type": "semantic"}
+{"qid": "q12", "question": "怎么让搜索既能理解意思又能认准专门的术语？", "relevant_chunk_ids": ["01-向量检索与Milvus#0", "02-BM25与混合检索#1"], "type": "semantic"}
+{"qid": "q13", "question": "两路搜索结果合并成一份排序，哪种方式最稳妥？", "relevant_chunk_ids": ["02-BM25与混合检索#3"], "type": "semantic"}
+{"qid": "q14", "question": "为什么非要把长文档切成一堆小片段？", "relevant_chunk_ids": ["03-重排序分块与评测#2"], "type": "semantic"}
+{"qid": "q15", "question": "知识库里查不到相关内容时，模型硬答乱编该怎么办？", "relevant_chunk_ids": ["03-重排序分块与评测#1"], "type": "semantic"}
+{"qid": "q16", "question": "检索做得准不准，可以用什么数字来衡量？", "relevant_chunk_ids": ["03-重排序分块与评测#3"], "type": "semantic"}
+{"qid": "q17", "question": "怎么证明我新加的那一层真的有作用，而不是自我感觉良好？", "relevant_chunk_ids": ["03-重排序分块与评测#4"], "type": "semantic"}
+{"qid": "q18", "question": "文档切得太大块会带来什么问题？", "relevant_chunk_ids": ["03-重排序分块与评测#2"], "type": "semantic"}
+{"qid": "q19", "question": "为什么向量归一化之后点乘就能当相似度用？", "relevant_chunk_ids": ["01-向量检索与Milvus#1"], "type": "semantic"}
+{"qid": "q20", "question": "中文技术名词被切得乱七八糟导致搜不到，有别的办法吗？", "relevant_chunk_ids": ["02-BM25与混合检索#2"], "type": "semantic"}
+
+{"qid": "q21", "question": "HNSW 索引有哪些关键参数，各自影响什么？", "relevant_chunk_ids": ["01-向量检索与Milvus#2", "01-向量检索与Milvus#3"], "type": "multi"}
+{"qid": "q22", "question": "RAG 的检索质量和生成质量分别怎么评估？", "relevant_chunk_ids": ["03-重排序分块与评测#3", "03-重排序分块与评测#4"], "type": "multi"}
+{"qid": "q23", "question": "BM25 和向量的分数不在一个量级，合并时怎么处理？", "relevant_chunk_ids": ["02-BM25与混合检索#0", "02-BM25与混合检索#3"], "type": "multi"}
+{"qid": "q24", "question": "分块的大小和重叠应该怎么确定？", "relevant_chunk_ids": ["03-重排序分块与评测#2"], "type": "multi"}
+{"qid": "q25", "question": "为什么重排之后还要再过滤一遍低分结果？", "relevant_chunk_ids": ["03-重排序分块与评测#1"], "type": "multi"}
+
+{"qid": "q26", "question": "从用户提问到给出排序结果，中间经过了哪几个环节？", "relevant_chunk_ids": ["01-向量检索与Milvus#0", "02-BM25与混合检索#3", "03-重排序分块与评测#0"], "type": "cross"}
+{"qid": "q27", "question": "有哪些手段可以降低 RAG 的幻觉？", "relevant_chunk_ids": ["03-重排序分块与评测#1", "03-重排序分块与评测#4"], "type": "cross"}
+{"qid": "q28", "question": "BM25 和向量检索各自的短板分别是什么？", "relevant_chunk_ids": ["01-向量检索与Milvus#0", "02-BM25与混合检索#1"], "type": "cross"}
+{"qid": "q29", "question": "自己部署一套 Milvus 要准备哪些组件？", "relevant_chunk_ids": ["01-向量检索与Milvus#3"], "type": "cross"}
+{"qid": "q30", "question": "一套完整的检索评测应该看哪几个指标，为什么不能只看一个？", "relevant_chunk_ids": ["03-重排序分块与评测#3"], "type": "cross"}

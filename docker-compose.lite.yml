@@ -1,0 +1,41 @@
+# 单机部署：Milvus 内嵌 etcd + 本地存储，不需要 etcd / MinIO 两个额外容器。
+# 适合开发机、演示环境、单机私有化部署。
+#
+# 生产环境的存算分离版本见 docker-compose.yml。
+services:
+  milvus:
+    container_name: rag-milvus
+    image: milvusdb/milvus:v2.4.13
+    command: ["milvus", "run", "standalone"]
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      ETCD_USE_EMBED: "true"
+      ETCD_DATA_DIR: /var/lib/milvus/etcd
+      ETCD_CONFIG_PATH: /milvus/configs/advanced/etcd.yaml
+      COMMON_STORAGE_TYPE: local
+    volumes:
+      - ./volumes/milvus:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 15s
+      start_period: 40s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    container_name: rag-redis
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - ./volumes/redis:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

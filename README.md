@@ -103,6 +103,28 @@ python -m eval.run_eval --backend milvus_rest --embedding ollama
 
 三个要一起看。只报 Hit Rate 容易自欺：把 k 调到 20，Hit Rate 必然好看，但噪声塞满上下文反而拉低生成质量。
 
+## 性能
+
+`scripts/bench.py` 对检索段做并发压测（Milvus 参与真实 ANN 查询，embedding 用哈希向量以排除模型耗时）：
+
+```
+200 请求 / 并发 8
+QPS     844.6
+P50     9.0 ms
+P95     14.8 ms
+P99     18.9 ms
+
+分段 P50：vector 8.9ms │ bm25 0.1ms │ fusion 0.02ms │ rerank 0(未启用)
+```
+
+**分段数据比总延迟更有信息量**：向量检索占了 98% 的耗时，而 BM25 只花 0.1ms。
+这说明混合检索的边际成本几乎可以忽略——多跑一路 BM25 换 Hit Rate +0.13，
+这笔账在任何规模下都划算。反过来，如果某天延迟吃紧，该优化的也是向量库
+（换 gRPC 替代 REST、调小 ef、加缓存），而不是砍掉 BM25 这一路。
+
+注意：上表不含 embedding 调用。接真实模型后，embedding 会取代向量检索成为
+主要瓶颈（API 约 80ms，本地 CPU 约 400ms），届时该优化的对象就变了。
+
 ## 快速开始
 
 ### 1. 起依赖服务

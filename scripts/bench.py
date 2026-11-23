@@ -41,7 +41,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=50, help="总请求数")
     ap.add_argument("--concurrency", type=int, default=4)
-    ap.add_argument("--backend", default="memory", choices=["memory", "milvus"])
+    ap.add_argument("--backend", default="memory", choices=["memory", "milvus", "milvus_rest"])
     ap.add_argument("--embedding", default="ollama", choices=["api", "local", "ollama", "hashing"])
     ap.add_argument("--question-file", default="eval/dataset.jsonl")
     ap.add_argument("--docs", default="docs")

@@ -1,0 +1,19 @@
+{
+  "requests": 200,
+  "concurrency": 8,
+  "wall_time_s": 0.24,
+  "qps": 844.6,
+  "latency_ms": {
+    "mean": 9.3,
+    "p50": 9.0,
+    "p95": 14.8,
+    "p99": 18.9,
+    "max": 22.0
+  },
+  "stage_breakdown_p50_ms": {
+    "vector": 8.9,
+    "bm25": 0.1,
+    "fusion": 0.02,
+    "rerank": 0.0
+  }
+}

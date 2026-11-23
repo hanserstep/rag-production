@@ -31,3 +31,27 @@
 {"qid": "q28", "question": "BM25 和向量检索各自的短板分别是什么？", "relevant_chunk_ids": ["01-向量检索与Milvus#0", "02-BM25与混合检索#1"], "type": "cross"}
 {"qid": "q29", "question": "自己部署一套 Milvus 要准备哪些组件？", "relevant_chunk_ids": ["01-向量检索与Milvus#3"], "type": "cross"}
 {"qid": "q30", "question": "一套完整的检索评测应该看哪几个指标，为什么不能只看一个？", "relevant_chunk_ids": ["03-重排序分块与评测#3"], "type": "cross"}
+
+{"qid": "q31", "question": "这个项目为什么选 DeepSeek 而不用别的模型？", "relevant_chunk_ids": ["04-RAG系统完整解析#10"], "type": "term"}
+{"qid": "q32", "question": "为什么 embedding 选 BAAI/bge-m3？", "relevant_chunk_ids": ["04-RAG系统完整解析#10"], "type": "term"}
+{"qid": "q33", "question": "切块之后 metadata 里存了哪些字段，有什么用？", "relevant_chunk_ids": ["04-RAG系统完整解析#3", "04-RAG系统完整解析#4"], "type": "term"}
+{"qid": "q34", "question": "为什么 pdfplumber 解析要先写成临时文件？", "relevant_chunk_ids": ["04-RAG系统完整解析#11"], "type": "semantic"}
+{"qid": "q35", "question": "问答接口返回给用户的是向量还是别的什么？", "relevant_chunk_ids": ["04-RAG系统完整解析#6"], "type": "semantic"}
+{"qid": "q36", "question": "System Prompt 是怎么把参考资料和问题分开的？", "relevant_chunk_ids": ["04-RAG系统完整解析#7"], "type": "semantic"}
+{"qid": "q37", "question": "上传一份文档到能问答，中间经历了哪几步？", "relevant_chunk_ids": ["04-RAG系统完整解析#1", "04-RAG系统完整解析#2", "04-RAG系统完整解析#3"], "type": "multi"}
+
+{"qid": "q38", "question": "数据量不到一万条的时候，选向量库还需要纠结吗？", "relevant_chunk_ids": ["05-向量库选型#0"], "type": "semantic"}
+{"qid": "q39", "question": "如果向量库是检索完再做元数据过滤，会有什么问题？", "relevant_chunk_ids": ["05-向量库选型#0"], "type": "term"}
+{"qid": "q40", "question": "Qdrant 和 pgvector 分别适合什么样的团队？", "relevant_chunk_ids": ["05-向量库选型#1"], "type": "multi"}
+{"qid": "q41", "question": "FAISS 能不能直接拿来当向量服务？", "relevant_chunk_ids": ["05-向量库选型#1"], "type": "term"}
+{"qid": "q42", "question": "每个文档建一个 collection 这种做法为什么不行？", "relevant_chunk_ids": ["05-向量库选型#2", "05-向量库选型#3"], "type": "cross"}
+
+{"qid": "q43", "question": "RAG 的缓存可以放在哪几个位置，哪个几乎没有风险？", "relevant_chunk_ids": ["06-RAG工程化实践#0"], "type": "term"}
+{"qid": "q44", "question": "知识库更新之后，缓存里的旧答案怎么失效？", "relevant_chunk_ids": ["06-RAG工程化实践#0"], "type": "semantic"}
+{"qid": "q45", "question": "一次问答的钱主要花在哪，怎么省？", "relevant_chunk_ids": ["06-RAG工程化实践#1"], "type": "multi"}
+{"qid": "q46", "question": "线上出问题时要记录哪些信息才能定位原因？", "relevant_chunk_ids": ["06-RAG工程化实践#2"], "type": "multi"}
+{"qid": "q47", "question": "拒答率一直是 0，这说明系统哪里不对？", "relevant_chunk_ids": ["06-RAG工程化实践#2", "06-RAG工程化实践#3"], "type": "cross"}
+{"qid": "q48", "question": "阈值应该怎么确定，宁可多拒答还是少拒答？", "relevant_chunk_ids": ["06-RAG工程化实践#3"], "type": "semantic"}
+{"qid": "q49", "question": "文档删除之后，为什么两套索引必须以同一个 id 为单位管理？", "relevant_chunk_ids": ["06-RAG工程化实践#4"], "type": "cross"}
+{"qid": "q50", "question": "chunk 的 id 为什么设计成文档 id 加序号的格式？", "relevant_chunk_ids": ["06-RAG工程化实践#4"], "type": "term"}
+

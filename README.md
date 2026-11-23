@@ -56,43 +56,65 @@
 ## 评测
 
 <!-- EVAL_RESULT_START -->
-### 消融结果（Hit Rate@5 / MRR / Recall@5，30 条 query）
+### 消融结果
 
-| 配置 | Hit Rate@5 | MRR | Recall@5 | 说明 |
+知识库 6 篇文档 / 35 个 chunk，评测集 50 条人工标注问题，Embedding 为 bge-m3，向量库为 Milvus。
+
+| 配置 | Hit Rate@5 | MRR | Recall@5 | P50 延迟 |
 |---|---|---|---|---|
-| `vector_only` | 0.667 | 0.434 | 0.633 | 只有向量检索，基线 |
-| `vector_bm25_concat` | 0.667 | 0.434 | 0.633 | 双路召回 + 旧版截断拼接 |
-| `vector_bm25_score` | 0.833 | 0.523 | 0.767 | 双路召回 + 分数归一化加权 |
-| `rrf_no_rerank` | 0.800 | 0.536 | 0.733 | 双路召回 + RRF 融合 |
-| `rrf_rerank` | 0.800 | 0.536 | 0.733 | 暂未生效，见下方说明 |
+| `vector_only` | 0.880 | 0.637 | 0.823 | 95ms |
+| `vector_bm25_concat` | 0.880 | 0.637 | 0.823 | 98ms |
+| `vector_bm25_score` | 0.940 | 0.682 | 0.883 | 94ms |
+| `rrf_no_rerank` | 0.940 | 0.669 | **0.903** | 91ms |
+| `rrf_rerank` | 0.940 | **0.704** | **0.903** | 224ms |
 
-**这组数字最值得看的是第二行**：双路召回后如果沿用旧版的"截断拼接"，
-相对纯向量基线**提升为 0**。原因是拼接后的顺序由遍历顺序决定，没有排序意义——
-两路结果只是被并排放进去，没有任何一路的信息被用来重新排序。
+### 三个结论
 
-换成 RRF 后 Hit Rate@5 提升 0.133、MRR 提升 0.101。这就是融合策略本身的价值，
-和"有没有做混合检索"是两件事。
+**1. 截断拼接等于没做融合。**
+`vector_bm25_concat` 相对纯向量基线的 Hit Rate、MRR、Recall **三项完全一致（变化都是 0.000）**——
+两路结果只是被并排放进去，排序由遍历顺序决定。这解释了为什么很多项目
+「做了混合检索但没效果」：问题不在混合，在融合。
 
-### 数据说明（重要）
+**2. 融合带来 +0.06 Hit Rate，RRF 的 Recall 最高。**
+分数加权和 RRF 的 Hit Rate 一样（0.940），但 RRF 的 Recall@5 高 0.02——
+说明 RRF 更容易把同一问题的多个相关片段一起召回。原因是 RRF 只按名次累加，
+一个文档只要在两路都排得靠前就能拿高分，不像加权融合会被单路的极端分数主导。
+代价是 MRR 略低于加权（0.669 vs 0.682），因为丢掉了分数的幅度信息。
 
-上表由 `python -m eval.run_eval --backend milvus_rest --embedding hashing` 生成。
-`hashing` 是字符 n-gram 哈希向量，用来在无模型环境下验证检索链路和评测框架的正确性，
-**它不具备真实语义能力，因此绝对数值偏低，不能代表 bge-m3 的效果**。
+**3. 重排序是最后一层，也是单层增益最大的。**
+RRF 加 Cross-Encoder 后 MRR 从 0.669 提到 0.704（+0.035），Hit Rate 不变——
+它不改变「召回了什么」，只改变「谁排第一」。代价是 P50 从 91ms 涨到 224ms，
+翻了 2.4 倍。是否值得看业务：答案质量敏感就值得，延迟敏感可以只精排 top 5。
 
-- `rrf_rerank` 与 `rrf_no_rerank` 数字相同，是因为 hashing 模式下刻意跳过了真实
-  Cross-Encoder（分数和上下文对不上，跑了反而误导）。接真模型后两者会分开。
-- 真实模型下预期绝对值会显著上升（Hit Rate@5 通常 0.85+），但**相对的差值关系**
-  （concat 无效、RRF 有效、重排提升 MRR 大于提升 Hit Rate）是稳定的结论。
+三层的分工可以这样记：**混合召回决定「能不能找到」（+0.06 Hit），
+RRF 决定「多个相关片段能否一起进来」（+0.02 Recall），
+重排决定「谁排第一」（+0.035 MRR）**。三者治的是不同的病。
+
+### 评测过程中修正的三个问题
+
+**语料规模不足会让结论完全失真。**
+第一版只有 3 篇文档 13 个 chunk，而评测的 top_k 是 5——候选集已经接近全库，
+Hit Rate 恒高，融合与否看不出差别，测出来的"RRF 不如基线"纯属噪声。
+扩到 35 个 chunk 后结论才稳定。
+
+**批量 embedding 不能只按条数切。**
+接口限制 32 条/次，但还有单次总 token 上限。36 个 chunk 按 32 切后第一批超限，
+返回的却是一个语焉不详的 `The parameter is invalid`——和参数格式无关。
+现在按「条数 + 总字符数」双约束切分。
+
+**改了分块策略，评测标注必须重新核对。**
+加入目录树清洗后，文档的 chunk 编号整体前移，原来标注的 `04#11` 指向的
+已经是另一段内容。如果不重新核对，测出来的分数下降会让人误以为是分块策略变差了，
+实际是标错了。这件事没法自动化，只能每次改 chunker 后手工过一遍高编号的文档。
 
 复现：
 
 ```bash
-# 无模型环境，验证流程
-python -m eval.run_eval --backend milvus_rest --embedding hashing
-
-# 真实效果（需要 bge-m3：ollama pull bge-m3，或配 SILICONFLOW_API_KEY）
-python -m eval.run_eval --backend milvus_rest --embedding ollama
+python -m eval.run_eval --backend milvus_rest --embedding api
 ```
+
+> 需要 `SILICONFLOW_API_KEY`（embedding 和 rerank 用同一个 key）。
+> 无 key 时用 `--embedding hashing` 可以验证流程正确性，但绝对数值不代表真实效果。
 <!-- EVAL_RESULT_END -->
 
 指标定义：

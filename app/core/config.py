@@ -12,6 +12,41 @@
 import os
 from dataclasses import dataclass, field
 from functools import lru_cache
+from pathlib import Path
+
+
+def _load_dotenv(path: str = ".env", override: bool = False) -> None:
+    """加载 .env 到环境变量。
+
+    不引入 python-dotenv：只需要支持 KEY=VALUE 这一种语法，
+    十几行就够了，少一个依赖。优先用 python-dotenv（若已安装）以支持
+    引号、多行等完整语法。
+
+    注意：只在环境变量不存在时写入，避免覆盖 docker-compose 传入的值。
+    这一点很重要——容器部署时环境变量优先级必须高于 .env 文件。
+    """
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(path, override=override)
+        return
+    except ImportError:
+        pass
+
+    p = Path(path)
+    if not p.exists():
+        return
+    for raw in p.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        key = key.strip()
+        val = val.split(" #")[0].strip().strip('"').strip("'")
+        if override or key not in os.environ:
+            os.environ[key] = val
+
+
+_load_dotenv()
 
 
 def _int(name: str, default: int) -> int:

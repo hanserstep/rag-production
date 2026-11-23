@@ -45,9 +45,21 @@ class BaseEmbedder(ABC):
 
 
 class SiliconFlowEmbedder(BaseEmbedder):
-    """硅基流动 bge-m3。批量接口单次最多 32 条，这里按 32 切。"""
+    """硅基流动 bge-m3。
+
+    批量策略：不能只按条数切。
+
+    接口对单条条数有限制（32 条），但对单次请求的**总 token 数也有限制**。
+    只按 32 条切会在文档块较长时超限，返回一个语焉不详的
+    "The parameter is invalid"——这个 400 和参数格式无关，是总量超了，
+    排查时容易误以为是模型名或字段写错。
+
+    所以在条数之外再加一道总字符数约束。中文约 1 字 1 token，
+    取 5000 字符作为保守上限，留出安全余量。
+    """
 
     BATCH = 32
+    MAX_CHARS = 5000
 
     def __init__(self, api_key: str, model: str = "BAAI/bge-m3", dim: int = 1024,
                  base_url: str = "https://api.siliconflow.cn/v1"):
@@ -59,10 +71,22 @@ class SiliconFlowEmbedder(BaseEmbedder):
         self.dim = dim
         self._total_tokens = 0  # 累计 token，用于成本统计
 
+    def _split_batches(self, texts: List[str]):
+        batch: List[str] = []
+        chars = 0
+        for t in texts:
+            # 单条就超上限时只能单独发，否则会死循环切不出来
+            if batch and (len(batch) >= self.BATCH or chars + len(t) > self.MAX_CHARS):
+                yield batch
+                batch, chars = [], 0
+            batch.append(t)
+            chars += len(t)
+        if batch:
+            yield batch
+
     def encode_documents(self, texts: List[str]) -> List[List[float]]:
         out: List[List[float]] = []
-        for i in range(0, len(texts), self.BATCH):
-            batch = texts[i:i + self.BATCH]
+        for batch in self._split_batches(texts):
             resp = self.client.embeddings.create(model=self.model, input=batch)
             self._total_tokens += getattr(resp.usage, "total_tokens", 0) or 0
             ordered = sorted(resp.data, key=lambda d: d.index)

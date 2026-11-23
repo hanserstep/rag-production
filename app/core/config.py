@@ -81,6 +81,10 @@ class Settings:
     # ---- 重排序 ----
     rerank_backend: str = field(default_factory=lambda: os.getenv("RERANK_BACKEND", "api"))
     rerank_model: str = field(default_factory=lambda: os.getenv("RERANK_MODEL", "BAAI/bge-reranker-v2-m3"))
+    # 相关性阈值：低于这个分数的片段直接丢弃，全部丢弃时直接拒答。
+    # bge-reranker 的相关片段通常在 0.8 以上，不相关的低于 0.01，
+    # 中间留出很大空档，0.3 是个比较安全的分界。
+    rerank_threshold: float = field(default_factory=lambda: _float("RERANK_THRESHOLD", 0.3))
 
     # ---- LLM ----
     deepseek_api_key: str = field(default_factory=lambda: os.getenv("DEEPSEEK_API_KEY", ""))

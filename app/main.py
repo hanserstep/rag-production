@@ -30,7 +30,7 @@ from app.ingest.chunker import DocumentChunker
 from app.ingest.embedder import build_embedder
 from app.llm.client import DeepSeekClient
 from app.retrieval.bm25 import BM25Index
-from app.retrieval.reranker import build_reranker
+from app.retrieval.reranker import ScoreThresholdReranker, build_reranker
 from app.retrieval.retriever import HybridRetriever
 from app.retrieval.vector_store import build_store
 
@@ -75,8 +75,11 @@ async def lifespan(app: FastAPI):
         ef_search=cfg.hnsw_ef_search,
     )
     bm25 = BM25Index(persist_path="data/bm25.pkl")
-    reranker = build_reranker(cfg.rerank_backend, api_key=cfg.siliconflow_api_key,
-                              model_path=cfg.rerank_model)
+    # 必须包一层阈值过滤：只精排不过滤，等于把不相关片段也交给模型，
+    # 检索不到相关内容时模型就会基于噪声硬编答案。这是 RAG 幻觉的主要来源。
+    base_reranker = build_reranker(cfg.rerank_backend, api_key=cfg.siliconflow_api_key,
+                                   model_path=cfg.rerank_model)
+    reranker = ScoreThresholdReranker(base_reranker, threshold=cfg.rerank_threshold)
 
     state.retriever = HybridRetriever(
         store=store, bm25=bm25, embedder=embedder, reranker=reranker,
@@ -228,6 +231,7 @@ async def ask(request: Request, req: QuestionRequest):
 
     if not req.stream:
         answer, usage = state.llm.complete(messages)
+        cost = state.llm.estimate_cost(usage, cfg)
         payload = {
             "answer": answer,
             "sources": [
@@ -237,10 +241,12 @@ async def ask(request: Request, req: QuestionRequest):
             ],
             "trace": result.trace.as_dict(),
             "usage": usage,
-            "cost": state.llm.estimate_cost(usage, cfg),
+            "cost": cost,
             "trace_id": trace_id,
         }
         state.stats["latencies"].append(result.trace.total_ms)
+        state.stats["tokens"] += usage.get("total_tokens", 0)
+        state.stats["cost"] += cost
         if req.use_cache and state.cache is not None:
             try:
                 state.cache.setex(key, cfg.cache_ttl, json.dumps(payload, ensure_ascii=False))

@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "n_docs": 6,
+    "n_chunks": 35,
+    "n_queries": 50,
+    "backend": "milvus_rest",
+    "embedder": "api",
+    "timestamp": "2026-11-24 00:48"
+  },
+  "results": [
+    {
+      "config": "vector_only",
+      "description": "只有向量检索，基线",
+      "n_queries": 50,
+      "hit_rate@1": 0.46,
+      "hit_rate@3": 0.8,
+      "hit_rate@5": 0.88,
+      "mrr@1": 0.46,
+      "mrr@3": 0.6167,
+      "mrr@5": 0.6367,
+      "recall@1": 0.43,
+      "recall@3": 0.6967,
+      "recall@5": 0.8233,
+      "p50_ms": 95.3,
+      "p95_ms": 211.7
+    },
+    {
+      "config": "vector_bm25_concat",
+      "description": "双路召回 + 旧版的截断拼接",
+      "n_queries": 50,
+      "hit_rate@1": 0.46,
+      "hit_rate@3": 0.8,
+      "hit_rate@5": 0.88,
+      "mrr@1": 0.46,
+      "mrr@3": 0.6167,
+      "mrr@5": 0.6367,
+      "recall@1": 0.43,
+      "recall@3": 0.6967,
+      "recall@5": 0.8233,
+      "p50_ms": 98.1,
+      "p95_ms": 171.3
+    },
+    {
+      "config": "vector_bm25_score",
+      "description": "双路召回 + 分数归一化加权",
+      "n_queries": 50,
+      "hit_rate@1": 0.52,
+      "hit_rate@3": 0.86,
+      "hit_rate@5": 0.94,
+      "mrr@1": 0.52,
+      "mrr@3": 0.6633,
+      "mrr@5": 0.6823,
+      "recall@1": 0.48,
+      "recall@3": 0.7667,
+      "recall@5": 0.8833,
+      "p50_ms": 94.2,
+      "p95_ms": 138.5
+    },
+    {
+      "config": "rrf_no_rerank",
+      "description": "双路召回 + RRF 融合",
+      "n_queries": 50,
+      "hit_rate@1": 0.52,
+      "hit_rate@3": 0.78,
+      "hit_rate@5": 0.94,
+      "mrr@1": 0.52,
+      "mrr@3": 0.63,
+      "mrr@5": 0.669,
+      "recall@1": 0.49,
+      "recall@3": 0.7367,
+      "recall@5": 0.9033,
+      "p50_ms": 91.2,
+      "p95_ms": 140.6
+    },
+    {
+      "config": "rrf_rerank",
+      "description": "RRF + Cross-Encoder 重排（默认线上配置）",
+      "n_queries": 50,
+      "hit_rate@1": 0.54,
+      "hit_rate@3": 0.84,
+      "hit_rate@5": 0.94,
+      "mrr@1": 0.54,
+      "mrr@3": 0.68,
+      "mrr@5": 0.704,
+      "recall@1": 0.49,
+      "recall@3": 0.7667,
+      "recall@5": 0.9033,
+      "p50_ms": 223.5,
+      "p95_ms": 333.2
+    }
+  ]
+}

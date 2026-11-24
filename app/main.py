@@ -268,6 +268,45 @@ async def ask(request: Request, req: QuestionRequest):
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
+# ---------------- 纯检索接口 ----------------
+# 供上层 Agent / 其他服务调用。只做检索不做生成：
+# 调用方拿到原始片段后自己决定怎么用，避免「一个 LLM 问另一个 LLM」——
+# 那样 token 翻倍、延迟翻倍，而且中间层的答案无法被调用方校验。
+
+class SearchRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=2000)
+    top_k: int = 10
+    rerank_top_n: int = 3
+    fusion_mode: str = "rrf"
+    use_bm25: bool = True
+    use_rerank: bool = True
+
+
+@app.post("/api/search")
+async def search(request: Request, req: SearchRequest):
+    result = state.retriever.retrieve(
+        query=req.question,
+        top_k=req.top_k,
+        rerank_top_n=req.rerank_top_n,
+        fusion_mode=req.fusion_mode,
+        use_bm25=req.use_bm25,
+        use_rerank=req.use_rerank,
+    )
+    return {
+        "hits": [
+            {
+                "id": h.id,
+                "doc_id": h.doc_id,
+                "content": h.content,
+                "score": float(h.meta.get("rerank_score", h.score)),
+            }
+            for h in result.hits
+        ],
+        "trace": result.trace.as_dict(),
+        "trace_id": request.state.trace_id,
+    }
+
+
 # ---------------- 运维 ----------------
 
 @app.get("/health")

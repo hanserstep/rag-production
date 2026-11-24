@@ -5,6 +5,5 @@ __pycache__/
 volumes/
 data/*.pkl
 data/*.db
-eval/EVAL_REPORT.*
 .DS_Store
 *.egg-info/
